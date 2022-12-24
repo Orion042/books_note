@@ -1,2 +1,2 @@
 # books_note
-Notes on books read.
+Summary of the book read.
