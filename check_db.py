@@ -10,7 +10,14 @@ cur = conn.cursor()
 
 cur.execute("SELECT * FROM book_infos")
 
+names = list(map(lambda x: x[0], cur.description))
+
+print(names)
+
+print("=================\n")
+
 for x in cur.fetchall():
     print(x)
+
 
 conn.close()

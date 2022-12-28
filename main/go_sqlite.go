@@ -8,22 +8,27 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 )
 
 type BookInfo struct {
-	ID         uint   `gorm:"primary_key"`
+	BookID     string `gorm:"primary_key"`
 	BookName   string `gorm:"primary_key"`
 	BookAuthor string
 	BookTag    pq.StringArray `gorm:"type:text[]"`
-	CreateAt   time.Time
-	UpdateAt   time.Time
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func insert_db(db *gorm.DB, book_name string, book_author string, book_tag []string) {
+
+	id, _ := uuid.NewUUID()
+
 	book_info := BookInfo{
+		BookID:     id.String(),
 		BookName:   book_name,
 		BookAuthor: book_author,
 		BookTag:    book_tag,
