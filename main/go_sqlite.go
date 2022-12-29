@@ -13,23 +13,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 )
+import "strings"
 
 type BookInfo struct {
 	BookID     string `gorm:"primary_key"`
-	BookName   string `gorm:"primary_key"`
+	BookTitle  string `gorm:"primary_key"`
 	BookAuthor string
 	BookTag    pq.StringArray `gorm:"type:text[]"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
 
-func insert_db(db *gorm.DB, book_name string, book_author string, book_tag []string) {
+func insert_db(db *gorm.DB, book_title string, book_author string, book_tag []string) {
 
 	id, _ := uuid.NewUUID()
 
 	book_info := BookInfo{
 		BookID:     id.String(),
-		BookName:   book_name,
+		BookTitle:  book_title,
 		BookAuthor: book_author,
 		BookTag:    book_tag,
 	}
@@ -74,20 +75,24 @@ func go_sql() {
 
 }
 
-//export check_go
-func check_go() {
-	fmt.Println("go working")
-}
-
-//export test_sql
-func test_sql() {
+//export preprocessing_sql
+func preprocessing_sql(book_title, book_author, book_tags *C.char) {
 	db := connect_db()
 
 	db.AutoMigrate(&BookInfo{})
 
-	tag := []string{"a", "b"}
+	bookTitle := C.GoString(book_title)
+	bookAuthor := C.GoString(book_author)
+	Tags := C.GoString(book_tags)
 
-	insert_db(db, "name", "author", tag)
+	bookTags := strings.Split(Tags, ",")
+
+	insert_db(db, bookTitle, bookAuthor, bookTags)
+}
+
+//export check_go
+func check_go() {
+	fmt.Println("go working")
 }
 
 func main() {}

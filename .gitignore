@@ -1,4 +1,7 @@
 .DS_Store
-/notes/test.html
+/notes/a.*
+/notes/test.*
+/md_files/a.*
+/md_files/test.*
 /py_files/__pycache__
 

@@ -75,8 +75,8 @@ extern "C" {
 #endif
 
 extern __declspec(dllexport) void go_sql();
+extern __declspec(dllexport) void preprocessing_sql(char* book_title, char* book_author, char* book_tags);
 extern __declspec(dllexport) void check_go();
-extern __declspec(dllexport) void test_sql();
 
 #ifdef __cplusplus
 }

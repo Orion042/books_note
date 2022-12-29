@@ -1,6 +1,5 @@
 from ctypes import *
-import ctypes
-from py_files import find_same_files
+import py_files
 import os
 import sys
 
@@ -16,9 +15,9 @@ def remove_comment(comment):
 def read_info(file_list):
     book_title = ""
     book_author = ""
-    book_tag = []
+    book_tags = []
 
-    with open(file_list) as f:
+    with open(file_list,encoding="utf-8") as f:
         index = 0
         for book_info in f:
             renamed_info = remove_comment(book_info)
@@ -27,30 +26,46 @@ def read_info(file_list):
             if index == 2:
                 book_title = renamed_info.lstrip("book_title: ")
             elif index == 3:
-                book_author = renamed_info.lstrip("book_author: ")
+                # book_author = renamed_info.lstrip("book_author: ") これだと著者名が消える
+                book_author = renamed_info.lstrip("book_author:").strip(" ")
             elif index == 4:
-                book_tag = renamed_info.lstrip("book_tags: ")
+                book_tags = renamed_info.lstrip("book_tags: ")
+
             index += 1
 
             if index >= 5:
                 break
-    
-    print(book_title)
-    print(book_author)
-    print(book_tag)
 
-    return book_title, book_author, book_tag
+    return book_title, book_author, book_tags
 
 def main():
-    get_same_files = find_same_files.find_same_files()
+
+    # goファイル読み込み
+    lib = cdll.LoadLibrary("./main/go_sqlite.so")
+
+    # 前処理(ファイル自動移動 and データベース保存)
+    get_same_files = py_files.find_same_files.find_same_files()
 
     for i in range(len(get_same_files)):
-        book_title, book_author, book_tag = read_info(get_same_files[i])
+        book_title, book_author, book_tags = read_info(get_same_files[i])
 
-    sys.exit()
+        lib.preprocessing_sql(book_title.encode(), book_author.encode(), book_tags.encode())
 
-    lib = cdll.LoadLibrary("./main/go_sqlite.so")
-    lib.test_sql()
+    # ユーザ選択開始
+    user_select = py_files.user_select.select()
+
+    if user_select == 9:
+        print("終了")
+        sys.exit()
+    elif user_select == 1:
+        pass
+    elif user_select == 2:
+        pass
+    elif user_select == 3:
+        pass
+    else:
+        print("入力エラー")
+        sys.exit()
 
 if __name__ == "__main__":
     main()
