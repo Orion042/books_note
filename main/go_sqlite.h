@@ -74,7 +74,11 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-extern __declspec(dllexport) void read_db(char* target);
+extern __declspec(dllexport) char* search_bookTitle_db(char* target);
+extern __declspec(dllexport) char* search_author_db(char* target);
+extern __declspec(dllexport) void show_all_tags();
+extern __declspec(dllexport) void search_tags_db(char* target);
+extern __declspec(dllexport) void show_all_db();
 extern __declspec(dllexport) void go_sql();
 extern __declspec(dllexport) void connect();
 extern __declspec(dllexport) void preprocessing_sql(char* book_title, char* file_name, char* book_author, char* book_tags);

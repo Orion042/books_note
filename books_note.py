@@ -38,6 +38,23 @@ def read_info(file_list):
 
     return book_title, book_author, book_tags
 
+def search_book_title(lib):
+    book_title = input("検索したい書籍名を入力 : ")
+
+    lib.search_bookTitle_db.restype = c_char_p
+
+    result = lib.search_bookTitle_db(book_title.encode()).decode("utf-8")
+
+    if result == "None":
+        sys.exit()
+
+    start_select = input(book_title + "を表示しますか[Y/N] : ")
+
+    if ((start_select.lower() == "yes") or (start_select.lower() == "y")):
+        py_files.start_web.start_html(result)
+    else:
+        sys.exit()
+
 def main():
 
     # goファイル読み込み
@@ -65,15 +82,35 @@ def main():
         sys.exit()
     elif user_select == 1:
         # 書籍名検索
-        book_name = input("検索したい書籍名を入力 : ")
-        lib.read_db(book_name.encode())
+        search_book_title(lib)
+
     elif user_select == 2:
         # 著者名検索
-        pass
+        book_author = input("検索したい著者名を入力 : ")
+
+        lib.search_author_db.restype = c_char_p
+
+        result = lib.search_author_db(book_author.encode()).decode("utf-8")
+
+        if result == "None":
+            sys.exit()
+
+        print("======================")
+
+        search_book_title(lib)
+
     elif user_select == 3:
         # タグ検索
-        pass
+        lib.show_all_tags()
+
+        book_tag = input("検索したいタグ名を入力(半角カンマで区切る) : ")
+        lib.search_tags_db(book_tag.encode())
+
     elif user_select == 4:
+        # 書籍全表示
+        lib.show_all_db()
+        
+    elif user_select == 5:
         # 更新
         pass
     else:

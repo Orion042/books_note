@@ -4,6 +4,7 @@ import (
 	"C"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -13,7 +14,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 )
-import "strings"
 
 type BookInfo struct {
 	BookID     string `gorm:"primary_key"`
@@ -23,6 +23,11 @@ type BookInfo struct {
 	BookTag    pq.StringArray `gorm:"type:text[]"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type Tags struct {
+	BookID  string
+	BookTag string
 }
 
 func insert_db(db *gorm.DB, book_title string, file_name string, book_author string, book_tag []string) {
@@ -41,17 +46,43 @@ func insert_db(db *gorm.DB, book_title string, file_name string, book_author str
 	if result.Error != nil {
 		log.Fatal(result.Error)
 	}
-	fmt.Println("ok")
-	fmt.Println(result.RowsAffected)
+	if result.RowsAffected < 1 {
+		fmt.Println("挿入件数0件")
+	}
 }
 
-//export read_db
-func read_db(target *C.char) {
+//export search_bookTitle_db
+func search_bookTitle_db(target *C.char) *C.char {
+	db := connect_db()
+
+	book_info := BookInfo{}
+
+	search_book := C.GoString(target)
+
+	result := db.Where("book_title = ?", search_book).Find(&book_info)
+
+	if result.RowsAffected < 1 {
+		fmt.Println("書籍が存在しません")
+		return C.CString("None")
+	}
+
+	return C.CString(book_info.FileName)
+}
+
+//export search_author_db
+func search_author_db(target *C.char) *C.char {
 	db := connect_db()
 
 	book_info := []BookInfo{}
 
-	db.Find(&book_info)
+	search_book := C.GoString(target)
+
+	result := db.Where("book_author = ?", search_book).Find(&book_info)
+
+	if result.RowsAffected < 1 {
+		fmt.Println("著者が存在しません")
+		return C.CString("None")
+	}
 
 	loop := len(book_info)
 
@@ -60,11 +91,103 @@ func read_db(target *C.char) {
 			fmt.Println("========================")
 		}
 		book := book_info[i]
+
 		fmt.Println("書籍名 : ", book.BookTitle)
 		fmt.Println("著者名 : ", book.BookAuthor)
-		fmt.Println("タグ名 : ", book.BookTag)
+		fmt.Println("タグ名 : ", array2string(book.BookTag))
 		fmt.Println("========================")
 	}
+
+	//result := strings.Join(file_name, ",")
+
+	//return C.CString(result)
+	return C.CString("Exist")
+}
+
+//export show_all_tags
+func show_all_tags() {
+	db := connect_db()
+
+	book_info := []BookInfo{}
+
+	result := db.Select("book_tag").Find(&book_info)
+
+	if result.RowsAffected < 1 {
+		fmt.Println("ファイルが存在しません")
+	}
+
+	loop := len(book_info)
+
+	var book []string
+
+	for i := 0; i < loop; i++ {
+		book = book_info[i].BookTag
+	}
+	fmt.Println("============ タグ一覧 ============")
+	fmt.Println(array2string(book))
+	fmt.Println("==================================")
+}
+
+//export search_tags_db
+func search_tags_db(target *C.char) {
+	db := connect_db()
+
+	book_info := []BookInfo{}
+
+	search_book := C.GoString(target)
+
+	result := db.Where("book_tag = ?", search_book).Find(&book_info)
+
+	if result.RowsAffected < 1 {
+		fmt.Println("ファイルが存在しません")
+	}
+
+	loop := len(book_info)
+
+	for i := 0; i < loop; i++ {
+		if i == 0 {
+			fmt.Println("========================")
+		}
+		book := book_info[i]
+
+		fmt.Println("書籍名 : ", book.BookTitle)
+		fmt.Println("著者名 : ", book.BookAuthor)
+		fmt.Println("タグ名 : ", array2string(book.BookTag))
+		fmt.Println("========================")
+	}
+}
+
+//export show_all_db
+func show_all_db() {
+	db := connect_db()
+
+	book_info := []BookInfo{}
+
+	result := db.Find(&book_info)
+
+	if result.RowsAffected < 1 {
+		fmt.Println("ファイルが存在しません")
+	}
+
+	loop := len(book_info)
+
+	for i := 0; i < loop; i++ {
+		if i == 0 {
+			fmt.Println("========================")
+		}
+		book := book_info[i]
+
+		fmt.Println("書籍名 : ", book.BookTitle)
+		fmt.Println("著者名 : ", book.BookAuthor)
+		fmt.Println("タグ名 : ", array2string(book.BookTag))
+		fmt.Println("========================")
+	}
+}
+
+func array2string(array []string) string {
+	tag := strings.Join(array, ",")
+
+	return tag
 }
 
 func update_db() {
