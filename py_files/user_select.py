@@ -7,6 +7,7 @@ def select():
         print("1 : 書籍名検索")
         print("2 : 著者名検索")
         print("3 : タグ検索")
+        print("4 : 更新")
         print("9 : 終了")
         print("================")
         

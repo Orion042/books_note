@@ -46,10 +46,16 @@ def main():
     # 前処理(ファイル自動移動 and データベース保存)
     get_same_files = py_files.find_same_files.find_same_files()
 
-    for i in range(len(get_same_files)):
-        book_title, book_author, book_tags = read_info(get_same_files[i])
+    if (len(get_same_files) >= 1):
+        for i in range(len(get_same_files)):
+            book_title, book_author, book_tags = read_info(get_same_files[i])
 
-        lib.preprocessing_sql(book_title.encode(), book_author.encode(), book_tags.encode())
+            file_name = py_files.remove_path.removed_pass(get_same_files[i])
+
+            lib.preprocessing_sql(book_title.encode(), file_name.encode(), book_author.encode(), book_tags.encode())
+    else:
+        lib.connect()
+
 
     # ユーザ選択開始
     user_select = py_files.user_select.select()
@@ -58,10 +64,17 @@ def main():
         print("終了")
         sys.exit()
     elif user_select == 1:
-        pass
+        # 書籍名検索
+        book_name = input("検索したい書籍名を入力 : ")
+        lib.read_db(book_name.encode())
     elif user_select == 2:
+        # 著者名検索
         pass
     elif user_select == 3:
+        # タグ検索
+        pass
+    elif user_select == 4:
+        # 更新
         pass
     else:
         print("入力エラー")
