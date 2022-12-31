@@ -2,34 +2,37 @@ package main
 
 import (
 	"C"
-	"fmt"
-	"log"
-	"strings"
-	"time"
 
 	"gorm.io/gorm"
 
-	"github.com/google/uuid"
-	"github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 )
+import (
+	"fmt"
+	"log"
+
+	"github.com/google/uuid"
+)
 
 type BookInfo struct {
+	gorm.Model
 	BookID     string `gorm:"primary_key"`
 	BookTitle  string `gorm:"primary_key"`
 	FileName   string
 	BookAuthor string
-	BookTag    pq.StringArray `gorm:"type:text[]"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	BookTag    []Tags `gorm:"many2many:book_table;"`
+	// CreatedAt  time.Time
+	// UpdatedAt  time.Time
 }
 
 type Tags struct {
-	BookID  string
-	BookTag string
+	gorm.Model
+	BookID   string
+	BookTags string
 }
 
+/*
 func insert_db(db *gorm.DB, book_title string, file_name string, book_author string, book_tag []string) {
 
 	id, _ := uuid.NewUUID()
@@ -198,15 +201,6 @@ func delete_db() {
 
 }
 
-func connect_db() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("./db/book_note.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	return db
-}
-
 //export go_sql
 func go_sql() {
 
@@ -216,13 +210,6 @@ func go_sql() {
 
 	//insert_db(db, "name", "author", tag)
 
-}
-
-//export connect
-func connect() {
-	db := connect_db()
-
-	db.AutoMigrate(&BookInfo{})
 }
 
 //export preprocessing_sql
@@ -240,10 +227,81 @@ func preprocessing_sql(book_title, file_name, book_author, book_tags *C.char) {
 
 	insert_db(db, bookTitle, fileName, bookAuthor, bookTags)
 }
+*/
+
+func connect_db() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("./db/book_note.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	return db
+}
+
+//export connect
+func connect() {
+	db := connect_db()
+
+	db.AutoMigrate(&BookInfo{})
+}
 
 //export check_go
 func check_go() {
-	fmt.Println("go working")
+	db := connect_db()
+
+	db.AutoMigrate(&BookInfo{})
+
+	book_title := "book_title"
+	file_name := "file_name"
+	book_author := "book_author"
+	book_tag := []string{"tag1", "tag2"}
+
+	id, _ := uuid.NewUUID()
+
+	tag := []Tags{
+		{
+			BookID:   id.String(),
+			BookTags: book_tag[0],
+		},
+		{
+			BookID:   id.String(),
+			BookTags: book_tag[1],
+		},
+	}
+
+	book_info := BookInfo{
+		BookID:     id.String(),
+		BookTitle:  book_title,
+		FileName:   file_name,
+		BookAuthor: book_author,
+		BookTag:    tag,
+	}
+
+	result := db.Create(&book_info)
+	if result.Error != nil {
+		log.Fatal(result.Error)
+	}
+	if result.RowsAffected < 1 {
+		fmt.Println("挿入件数0件")
+	}
 }
 
 func main() {}
+
+/*
+
+import (
+	"C"
+	"fmt"
+	"log"
+	"strings"
+
+	"gorm.io/gorm"
+
+	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+)
+
+
+*/
