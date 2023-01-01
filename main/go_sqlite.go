@@ -113,6 +113,18 @@ func search_author_db(target *C.char) *C.char {
 	return C.CString("Exist")
 }
 
+func removeDuplicate(args []string) []string {
+	results := make([]string, 0, len(args))
+	encountered := map[string]bool{}
+	for i := 0; i < len(args); i++ {
+		if !encountered[args[i]] {
+			encountered[args[i]] = true
+			results = append(results, args[i])
+		}
+	}
+	return results
+}
+
 //export show_all_tags
 func show_all_tags() {
 	db := connect_db()
@@ -132,13 +144,16 @@ func show_all_tags() {
 	for i := 0; i < loop; i++ {
 		tag = append(tag, tag_info[i].BookTags)
 	}
+
+	removed := removeDuplicate(tag)
+
 	fmt.Println("============ タグ一覧 ============")
-	fmt.Println(array2string(tag))
+	fmt.Println(array2string(removed))
 	fmt.Println("==================================")
 }
 
 //export search_tags_db
-func search_tags_db(target *C.char) {
+func search_tags_db(target *C.char) *C.char {
 	db := connect_db()
 
 	tag_info := []Tags{}
@@ -149,6 +164,7 @@ func search_tags_db(target *C.char) {
 
 	if result.RowsAffected < 1 {
 		fmt.Println("ファイルが存在しません")
+		return C.CString("None")
 	}
 
 	loop := len(tag_info)
@@ -163,6 +179,7 @@ func search_tags_db(target *C.char) {
 		fmt.Println("タグ名 : ", array2string(get_tags(db, tag_info[i].BookID)))
 		fmt.Println("========================")
 	}
+	return C.CString("Exist")
 }
 
 //export show_all_db
@@ -211,6 +228,20 @@ func preprocessing_sql(book_title, file_name, book_author, book_tags *C.char) {
 	db := connect_db()
 
 	db.AutoMigrate(&BookInfo{})
+
+	bookTitle := C.GoString(book_title)
+	fileName := C.GoString(file_name)
+	bookAuthor := C.GoString(book_author)
+	Tags := C.GoString(book_tags)
+
+	bookTags := strings.Split(Tags, ",")
+
+	insert_db(db, bookTitle, fileName, bookAuthor, bookTags)
+}
+
+//export insert
+func insert(book_title, file_name, book_author, book_tags *C.char) {
+	db := connect_db()
 
 	bookTitle := C.GoString(book_title)
 	fileName := C.GoString(file_name)

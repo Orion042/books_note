@@ -104,13 +104,35 @@ def main():
         lib.show_all_tags()
 
         book_tag = input("検索したいタグ名を入力(半角カンマで区切る) : ")
-        lib.search_tags_db(book_tag.encode())
+
+        lib.search_tags_db.restype = c_char_p
+
+        result = lib.search_tags_db(book_tag.encode())
+
+        if result == "None":
+            sys.exit()
+        else:
+            search_book_title(lib)
 
     elif user_select == 4:
         # 書籍全表示
         lib.show_all_db()
-        
+
     elif user_select == 5:
+        # 追加
+        file_name = input("htmlファイル名を入力 : ")
+
+        file_result, md_file = py_files.find_files.find_htmlFile(file_name)
+
+        if (file_result):
+            book_title, book_author, book_tags = read_info(md_file[0])
+
+            lib.insert(book_title.encode(), file_name.encode(), book_author.encode(), book_tags.encode())
+
+        else:
+            sys.exit()
+        
+    elif user_select == 6:
         # 更新
         pass
     else:
