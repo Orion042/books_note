@@ -21,7 +21,6 @@ def read_info(file_list):
         index = 0
         for book_info in f:
             renamed_info = remove_comment(book_info)
-            print(renamed_info)
 
             if index == 2:
                 book_title = renamed_info.lstrip("book_title: ")
@@ -134,7 +133,8 @@ def main():
         
     elif user_select == 6:
         # 更新
-        pass
+        print("未実装")
+        sys.exit()
     else:
         print("入力エラー")
         sys.exit()

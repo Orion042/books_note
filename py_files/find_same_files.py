@@ -21,8 +21,7 @@ def find_same_files():
         md_file_list.extend(glob.glob(path + files))
 
     for i in range(len(md_file_list)):
-        # shutil.move(html_files[i], get_file_path("notes"))
-        pass
+        shutil.move(html_files[i], get_file_path("notes"))
 
     return md_file_list
 
