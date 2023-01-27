@@ -3,7 +3,7 @@ import os
 def createDirectory():
     path = os.getcwd()
     
-    directorys = ["md_files","notes","hello"]
+    directorys = ["md_files","notes"]
 
     for name in directorys:
         if not (os.path.isdir(path + "\\" + name)):
