@@ -56,6 +56,8 @@ def search_book_title(lib):
 
 def main():
 
+    py_files.checkDirectory.createDirectory()
+
     # goファイル読み込み
     lib = cdll.LoadLibrary("./main/go_sqlite.so")
 
